@@ -1100,32 +1100,168 @@
             
             // Function to handle role-specific queries
             function handleRoleSpecificQuery(query, roleType) {
-                // Create a new card to show the answer
-                const answerCard = document.createElement('div');
-                answerCard.className = 'card';
-                answerCard.innerHTML = `
-                    <h3>Answer for: ${query}</h3>
-                    <div class="role-answer">Processing your ${roleType} query...</div>
-                `;
+                // Create a new card to show the answer if it doesn't exist yet
+                let roleAnswerCard = document.querySelector(`.${roleType}-answer-card`);
                 
-                // Add the card to the role content
-                document.getElementById(`${roleType}-role`).appendChild(answerCard);
-                
-                // Simulate a fetch request - in the real implementation, you would:
-                // 1. Add the role context to the query
-                // 2. Send to your backend with role information
-                setTimeout(() => {
-                    const answerDiv = answerCard.querySelector('.role-answer');
+                if (!roleAnswerCard) {
+                    roleAnswerCard = document.createElement('div');
+                    roleAnswerCard.className = `card ${roleType}-answer-card`;
+                    roleAnswerCard.innerHTML = `
+                        <h3>Answer</h3>
+                        <div class="role-answer">Processing your query...</div>
+                        <h3>Relevant Context</h3>
+                        <div class="role-context-container"></div>
+                    `;
                     
-                    // Different mock responses based on role
-                    if (roleType === 'customer-support') {
-                        answerDiv.textContent = "Based on our customer support knowledge base, the answer to your query is: We typically resolve this issue by verifying the customer's account and resetting their credentials. Would you like me to provide a step-by-step guide?";
-                    } else if (roleType === 'sales') {
-                        answerDiv.textContent = "From our sales perspective, I can tell you that our premium package offers the best value with a 15% discount for annual subscriptions. Would you like me to provide more information about pricing tiers?";
-                    } else if (roleType === 'technical') {
-                        answerDiv.textContent = "From a technical standpoint, this is handled through our API using the endpoint POST /api/v2/resources. The correct parameters would be {id: string, config: object}. Would you like me to show a code example?";
+                    // Add the card to the role content
+                    document.getElementById(`${roleType}-role`).appendChild(roleAnswerCard);
+                } else {
+                    // If answer card already exists, update the text
+                    const answerDiv = roleAnswerCard.querySelector('.role-answer');
+                    answerDiv.textContent = "Processing your query...";
+                    
+                    // Clear previous context
+                    const contextContainer = roleAnswerCard.querySelector('.role-context-container');
+                    if (contextContainer) {
+                        contextContainer.innerHTML = '';
                     }
-                }, 1500);
+                }
+                
+                // Add role context to the query
+                const contextualizedQuery = addRoleContext(query, roleType);
+                
+                // Show a notification
+                showNotification(`Processing ${roleType} query...`, 'info', `${roleType}-query`);
+                
+                // Actually call the query API endpoint
+                fetch(QUERY_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: contextualizedQuery,
+                        top_k: 3,
+                        role: roleType // Include role information for the backend
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove notification
+                    removeNotification(`${roleType}-query`);
+                    
+                    // Display answer
+                    const answerDiv = roleAnswerCard.querySelector('.role-answer');
+                    answerDiv.textContent = data.answer || 'No answer available.';
+                    
+                    // Display context
+                    const contextContainer = roleAnswerCard.querySelector('.role-context-container');
+                    if (contextContainer) {
+                        contextContainer.innerHTML = '';
+                        
+                        if (data.context && data.context.length > 0) {
+                            data.context.forEach(item => {
+                                const contextItem = document.createElement('div');
+                                contextItem.className = 'context-item';
+                                
+                                const source = item.metadata && item.metadata.source
+                                    ? `<strong>Source: ${item.metadata.source}</strong>`
+                                    : '';
+                                
+                                contextItem.innerHTML = `
+                                    ${source}
+                                    <p>${item.text}</p>
+                                    <div class="context-meta">
+                                        <small>Relevance: ${(item.score * 100).toFixed(1)}%</small>
+                                    </div>
+                                `;
+                                
+                                contextContainer.appendChild(contextItem);
+                            });
+                        } else {
+                            contextContainer.innerHTML = '<p>No relevant context found</p>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error in role-specific query:', error);
+                    
+                    // Remove notification
+                    removeNotification(`${roleType}-query`);
+                    
+                    // Show error message
+                    const answerDiv = roleAnswerCard.querySelector('.role-answer');
+                    answerDiv.textContent = `Error: ${error.message}`;
+                    
+                    // Show notification
+                    showNotification('Query error: ' + error.message, 'error');
+                });
+            }
+
+            // Helper function to add role-specific context to queries
+            function addRoleContext(query, roleType) {
+                const roleContexts = {
+                    'customer-support': 'As a customer support agent, ',
+                    'sales': 'As a sales representative, ',
+                    'technical': 'As a technical specialist, '
+                };
+                
+                return roleContexts[roleType] ? `${roleContexts[roleType]}${query}` : query;
+            }
+
+            // Helper function to show notifications (add this if it doesn't exist)
+            function showNotification(message, type, id) {
+                // Create a notification div if it doesn't exist
+                let notificationsContainer = document.getElementById('notifications');
+                if (!notificationsContainer) {
+                    notificationsContainer = document.createElement('div');
+                    notificationsContainer.id = 'notifications';
+                    notificationsContainer.className = 'notifications';
+                    document.body.appendChild(notificationsContainer);
+                }
+                
+                // Create the notification
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                // Add ID if provided
+                if (id) {
+                    notification.id = `notification-${id}`;
+                    // Remove existing notification with same ID if exists
+                    const existingNotification = document.getElementById(`notification-${id}`);
+                    if (existingNotification) {
+                        notificationsContainer.removeChild(existingNotification);
+                    }
+                }
+                
+                // Add to container
+                notificationsContainer.appendChild(notification);
+                
+                // Auto dismiss if not an error
+                if (type !== 'error' && !id) {
+                    setTimeout(() => {
+                        notification.style.opacity = '0';
+                        setTimeout(() => {
+                            if (notification.parentNode === notificationsContainer) {
+                                notificationsContainer.removeChild(notification);
+                            }
+                        }, 300);
+                    }, 3000);
+                }
+            }
+
+            // Helper function to remove a notification
+            function removeNotification(id) {
+                const notification = document.getElementById(`notification-${id}`);
+                if (notification) {
+                    notification.style.opacity = '0';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
             }
         });
     </script>
