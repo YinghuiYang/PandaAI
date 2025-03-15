@@ -362,6 +362,89 @@
                 align-self: flex-end;
             }
         }
+
+        /* Role Selector Styles */
+        .role-selector {
+            position: relative;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        
+        .role-selector-button {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .role-selector-button:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .role-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 220px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            font-family: 'Poppins', sans-serif;
+            display: none;
+        }
+        
+        .role-dropdown.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .role-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        
+        .role-option:last-child {
+            border-bottom: none;
+        }
+        
+        .role-option:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .role-option.active {
+            background-color: rgba(67, 97, 238, 0.1);
+            font-weight: 500;
+        }
+        
+        /* Role-specific content areas */
+        .role-content {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .role-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 
@@ -370,6 +453,19 @@
         <header>
             <h1>PandaAIQA</h1>
             <p>Upload documents and ask questions – get answers based on your knowledge base</p>
+            
+            <!-- Add Role Selector -->
+            <div class="role-selector">
+                <button id="role-selector-button" class="role-selector-button">
+                    <span id="current-role">Default Role</span> ▼
+                </button>
+                <div id="role-dropdown" class="role-dropdown">
+                    <div class="role-option active" data-role="default">Default Role</div>
+                    <div class="role-option" data-role="customer-support">Customer Support Agent</div>
+                    <div class="role-option" data-role="sales">Sales Representative</div>
+                    <div class="role-option" data-role="technical">Technical Specialist</div>
+                </div>
+            </div>
         </header>
 
         <div class="status-bar">
@@ -382,29 +478,207 @@
             <button id="clear-button" class="clear-button">Clear Knowledge Base</button>
         </div>
 
-        <div class="card">
-            <h2>Step 1: Upload Documents</h2>
-            <p>Supported file types: TXT, MD, CSV</p>
-            <div id="file-upload" class="file-upload">
-                <p>Click or drag & drop files here to upload</p>
-                <input type="file" id="file-input" accept=".txt,.md,.csv,.pdf,.mp4">
+        <!-- Default role content - your existing cards -->
+        <div id="default-role" class="role-content active">
+            <div class="card">
+                <h2>Step 1: Upload Documents</h2>
+                <p>Supported file types: TXT, MD, CSV</p>
+                <div id="file-upload" class="file-upload">
+                    <p>Click or drag & drop files here to upload</p>
+                    <input type="file" id="file-input" accept=".txt,.md,.csv,.pdf,.mp4">
+                </div>
+                <div id="upload-message" class="message" style="display: none;"></div>
             </div>
-            <div id="upload-message" class="message" style="display: none;"></div>
+
+            <div class="card">
+                <h2>Step 2: Ask Questions</h2>
+                <div class="query-box">
+                    <input type="text" id="query-input" placeholder="Type your question here...">
+                    <button id="query-button">Ask <div id="query-spinner" class="spinner"></div></button>
+                </div>
+
+                <div id="answer-card" class="answer-card">
+                    <h3>Answer</h3>
+                    <div id="answer-text"></div>
+
+                    <h3>Relevant Context</h3>
+                    <div id="context-container"></div>
+                </div>
+            </div>
         </div>
-
-        <div class="card">
-            <h2>Step 2: Ask Questions</h2>
-            <div class="query-box">
-                <input type="text" id="query-input" placeholder="Type your question here...">
-                <button id="query-button">Ask <div id="query-spinner" class="spinner"></div></button>
+        
+        <!-- Customer Support Role Content -->
+        <div id="customer-support-role" class="role-content">
+            <!-- Add file upload card -->
+            <div class="card">
+                <h2>Upload Support Documents</h2>
+                <p>Upload customer service protocols, FAQs, and support guides</p>
+                <div id="support-file-upload" class="file-upload">
+                    <p>Click or drag & drop files here to upload</p>
+                    <input type="file" id="support-file-input" accept=".txt,.md,.csv,.pdf" onload="console.log('Support file input loaded')">
+                </div>
+                <div id="support-upload-message" class="message" style="display: none;"></div>
             </div>
-
-            <div id="answer-card" class="answer-card">
-                <h3>Answer</h3>
-                <div id="answer-text"></div>
-
-                <h3>Relevant Context</h3>
-                <div id="context-container"></div>
+            
+            <div class="card">
+                <h2>Customer Support Portal</h2>
+                <div class="support-dashboard">
+                    <div class="ticket-queue">
+                        <h3>Ticket Queue</h3>
+                        <div class="ticket-list">
+                            <div class="ticket">
+                                <span class="ticket-id">TKT-1234</span>
+                                <span class="ticket-priority high">High</span>
+                                <span class="ticket-subject">Login issue on mobile app</span>
+                                <span class="ticket-time">10m ago</span>
+                            </div>
+                            <div class="ticket">
+                                <span class="ticket-id">TKT-1235</span>
+                                <span class="ticket-priority medium">Medium</span>
+                                <span class="ticket-subject">Billing question</span>
+                                <span class="ticket-time">25m ago</span>
+                            </div>
+                            <div class="ticket">
+                                <span class="ticket-id">TKT-1236</span>
+                                <span class="ticket-priority low">Low</span>
+                                <span class="ticket-subject">Feature request</span>
+                                <span class="ticket-time">1h ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="query-box" style="margin-top: 20px;">
+                    <input type="text" id="support-query-input" placeholder="Ask a customer support question...">
+                    <button id="support-query-button">Ask</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Knowledge Base</h2>
+                <ul class="kb-list">
+                    <li><a href="#">Common Account Issues</a></li>
+                    <li><a href="#">Billing FAQ</a></li>
+                    <li><a href="#">Product Documentation</a></li>
+                    <li><a href="#">Support Procedures</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Sales Representative Role Content -->
+        <div id="sales-role" class="role-content">
+            <!-- Add file upload card -->
+            <div class="card">
+                <h2>Upload Sales Materials</h2>
+                <p>Upload product descriptions, pricing, and sales scripts</p>
+                <div id="sales-file-upload" class="file-upload">
+                    <p>Click or drag & drop files here to upload</p>
+                    <input type="file" id="sales-file-input" accept=".txt,.md,.csv,.pdf" onload="console.log('Sales file input loaded')">
+                </div>
+                <div id="sales-upload-message" class="message" style="display: none;"></div>
+            </div>
+            
+            <div class="card">
+                <h2>Sales Dashboard</h2>
+                <div class="sales-metrics">
+                    <div class="metric">
+                        <span class="metric-value">$24,500</span>
+                        <span class="metric-label">Monthly Sales</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value">12</span>
+                        <span class="metric-label">Open Deals</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value">85%</span>
+                        <span class="metric-label">Quota Progress</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Lead Management</h2>
+                <div class="lead-list">
+                    <div class="lead-item">
+                        <div class="lead-name">Acme Corporation</div>
+                        <div class="lead-status hot">Hot Lead</div>
+                        <div class="lead-value">$12,000</div>
+                    </div>
+                    <div class="lead-item">
+                        <div class="lead-name">Global Industries</div>
+                        <div class="lead-status warm">Warm Lead</div>
+                        <div class="lead-value">$8,500</div>
+                    </div>
+                    <div class="lead-item">
+                        <div class="lead-name">Tech Innovators</div>
+                        <div class="lead-status cold">Cold Lead</div>
+                        <div class="lead-value">$5,000</div>
+                    </div>
+                </div>
+                
+                <div class="query-box" style="margin-top: 20px;">
+                    <input type="text" id="sales-query-input" placeholder="Ask about sales strategies or products...">
+                    <button id="sales-query-button">Ask</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Technical Specialist Role Content -->
+        <div id="technical-role" class="role-content">
+            <!-- Add file upload card -->
+            <div class="card">
+                <h2>Upload Technical Documents</h2>
+                <p>Upload API documentation, guides, and technical specifications</p>
+                <div id="technical-file-upload" class="file-upload">
+                    <p>Click or drag & drop files here to upload</p>
+                    <input type="file" id="technical-file-input" accept=".txt,.md,.csv,.pdf,.json" onload="console.log('Technical file input loaded')">
+                </div>
+                <div id="technical-upload-message" class="message" style="display: none;"></div>
+            </div>
+            
+            <div class="card">
+                <h2>Technical Documentation</h2>
+                <div class="doc-categories">
+                    <div class="doc-category">
+                        <h3>API References</h3>
+                        <ul>
+                            <li><a href="#">REST API v2.0</a></li>
+                            <li><a href="#">GraphQL Endpoints</a></li>
+                            <li><a href="#">WebSocket Integration</a></li>
+                        </ul>
+                    </div>
+                    <div class="doc-category">
+                        <h3>System Architecture</h3>
+                        <ul>
+                            <li><a href="#">Microservices Overview</a></li>
+                            <li><a href="#">Database Schema</a></li>
+                            <li><a href="#">Security Protocols</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Technical Support</h2>
+                <div class="system-status">
+                    <div class="status-item green">
+                        <span class="status-name">API Services</span>
+                        <span class="status-value">Operational</span>
+                    </div>
+                    <div class="status-item green">
+                        <span class="status-name">Database Clusters</span>
+                        <span class="status-value">Operational</span>
+                    </div>
+                    <div class="status-item yellow">
+                        <span class="status-name">CDN Delivery</span>
+                        <span class="status-value">Degraded Performance</span>
+                    </div>
+                </div>
+                
+                <div class="query-box" style="margin-top: 20px;">
+                    <input type="text" id="technical-query-input" placeholder="Ask a technical question...">
+                    <button id="technical-query-button">Ask</button>
+                </div>
             </div>
         </div>
     </div>
@@ -427,6 +701,19 @@
             const checkLmButton = document.getElementById('check-lm-button');
             const clearButton = document.getElementById('clear-button');
 
+            // Role-specific file upload elements
+            const supportFileUpload = document.getElementById('support-file-upload');
+            const supportFileInput = document.getElementById('support-file-input');
+            const supportUploadMessage = document.getElementById('support-upload-message');
+            
+            const salesFileUpload = document.getElementById('sales-file-upload');
+            const salesFileInput = document.getElementById('sales-file-input');
+            const salesUploadMessage = document.getElementById('sales-upload-message');
+            
+            const technicalFileUpload = document.getElementById('technical-file-upload');
+            const technicalFileInput = document.getElementById('technical-file-input');
+            const technicalUploadMessage = document.getElementById('technical-upload-message');
+
             // API paths
             const API_URL = window.location.origin;
             const UPLOAD_URL = `${API_URL}/api/upload`;
@@ -439,7 +726,7 @@
             checkStatus();
             checkLMStudioStatus();
 
-            // File upload event handlers
+            // Default file upload event handlers
             fileUpload.addEventListener('click', () => fileInput.click());
             fileUpload.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -452,14 +739,92 @@
                 e.preventDefault();
                 fileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
                 if (e.dataTransfer.files.length) {
-                    handleFileUpload(e.dataTransfer.files[0]);
+                    handleFileUpload(e.dataTransfer.files[0], 'default', fileUpload, uploadMessage);
                 }
             });
             fileInput.addEventListener('change', () => {
                 if (fileInput.files.length) {
-                    handleFileUpload(fileInput.files[0]);
+                    handleFileUpload(fileInput.files[0], 'default', fileUpload, uploadMessage);
                 }
             });
+
+            // Support role file upload event handlers
+            if (supportFileUpload && supportFileInput) {
+                console.log('Setting up support file upload');
+                supportFileUpload.addEventListener('click', () => supportFileInput.click());
+                supportFileUpload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    supportFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+                });
+                supportFileUpload.addEventListener('dragleave', () => {
+                    supportFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+                });
+                supportFileUpload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    supportFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+                    if (e.dataTransfer.files.length) {
+                        handleFileUpload(e.dataTransfer.files[0], 'customer-support', supportFileUpload, supportUploadMessage);
+                    }
+                });
+                supportFileInput.addEventListener('change', () => {
+                    console.log('Support file input changed');
+                    if (supportFileInput.files.length) {
+                        handleFileUpload(supportFileInput.files[0], 'customer-support', supportFileUpload, supportUploadMessage);
+                    }
+                });
+            }
+
+            // Sales role file upload event handlers
+            if (salesFileUpload && salesFileInput) {
+                console.log('Setting up sales file upload');
+                salesFileUpload.addEventListener('click', () => salesFileInput.click());
+                salesFileUpload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    salesFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+                });
+                salesFileUpload.addEventListener('dragleave', () => {
+                    salesFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+                });
+                salesFileUpload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    salesFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+                    if (e.dataTransfer.files.length) {
+                        handleFileUpload(e.dataTransfer.files[0], 'sales', salesFileUpload, salesUploadMessage);
+                    }
+                });
+                salesFileInput.addEventListener('change', () => {
+                    console.log('Sales file input changed');
+                    if (salesFileInput.files.length) {
+                        handleFileUpload(salesFileInput.files[0], 'sales', salesFileUpload, salesUploadMessage);
+                    }
+                });
+            }
+
+            // Technical role file upload event handlers
+            if (technicalFileUpload && technicalFileInput) {
+                console.log('Setting up technical file upload');
+                technicalFileUpload.addEventListener('click', () => technicalFileInput.click());
+                technicalFileUpload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    technicalFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+                });
+                technicalFileUpload.addEventListener('dragleave', () => {
+                    technicalFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+                });
+                technicalFileUpload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    technicalFileUpload.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
+                    if (e.dataTransfer.files.length) {
+                        handleFileUpload(e.dataTransfer.files[0], 'technical', technicalFileUpload, technicalUploadMessage);
+                    }
+                });
+                technicalFileInput.addEventListener('change', () => {
+                    console.log('Technical file input changed');
+                    if (technicalFileInput.files.length) {
+                        handleFileUpload(technicalFileInput.files[0], 'technical', technicalFileUpload, technicalUploadMessage);
+                    }
+                });
+            }
 
             // Query button event handler
             queryButton.addEventListener('click', handleQuery);
@@ -478,32 +843,44 @@
             checkLmButton.addEventListener('click', checkLMStudioStatus);
 
             // Handle file upload
-            function handleFileUpload(file) {
+            function handleFileUpload(file, role = 'default', uploadElement, messageElement) {
+                console.log(`Uploading file for role: ${role}`);
                 const formData = new FormData();
                 formData.append('file', file);
+                
+                // Add role metadata if not default
+                if (role !== 'default') {
+                    formData.append('role', role);
+                }
 
                 // Display upload in progress
-                showMessage(uploadMessage, 'Uploading file...', 'info');
+                showMessage(messageElement, 'Uploading file...', 'info');
 
                 fetch(UPLOAD_URL, {
                     method: 'POST',
                     body: formData
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            showMessage(uploadMessage, data.message, 'success');
-                            checkStatus();
-                        } else {
-                            showMessage(uploadMessage, 'Upload failed: ' + (data.detail || 'Unknown error'), 'error');
-                        }
-                    })
-                    .catch(error => {
-                        showMessage(uploadMessage, 'Upload error: ' + error.message, 'error');
-                    });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        showMessage(messageElement, data.message, 'success');
+                        checkStatus();
+                    } else {
+                        showMessage(messageElement, 'Upload failed: ' + (data.detail || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage(messageElement, 'Upload error: ' + error.message, 'error');
+                });
 
-                // Reset file input
-                fileInput.value = '';
+                // Reset file input based on role
+                let inputToReset;
+                if (role === 'default') inputToReset = fileInput;
+                else if (role === 'customer-support') inputToReset = supportFileInput;
+                else if (role === 'sales') inputToReset = salesFileInput;
+                else if (role === 'technical') inputToReset = technicalFileInput;
+
+                if (inputToReset) inputToReset.value = '';
             }
 
             // Handle query
@@ -642,6 +1019,113 @@
                         element.style.display = 'none';
                     }, 5000);
                 }
+            }
+
+            // Role selector functionality
+            const roleSelectorButton = document.getElementById('role-selector-button');
+            const roleDropdown = document.getElementById('role-dropdown');
+            const roleOptions = document.querySelectorAll('.role-option');
+            const currentRoleText = document.getElementById('current-role');
+            const roleContents = document.querySelectorAll('.role-content');
+            
+            // Toggle dropdown
+            roleSelectorButton.addEventListener('click', () => {
+                roleDropdown.classList.toggle('active');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!roleSelectorButton.contains(event.target) && !roleDropdown.contains(event.target)) {
+                    roleDropdown.classList.remove('active');
+                }
+            });
+            
+            // Role selection
+            roleOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Update active option styling
+                    roleOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    
+                    // Update current role text
+                    currentRoleText.textContent = option.textContent;
+                    
+                    // Hide dropdown
+                    roleDropdown.classList.remove('active');
+                    
+                    // Show appropriate content
+                    const selectedRole = option.getAttribute('data-role');
+                    roleContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${selectedRole}-role`).classList.add('active');
+                    
+                    // Log role change (for debugging)
+                    console.log(`Role changed to: ${selectedRole}`);
+                });
+            });
+            
+            // Add additional role-specific query handlers
+            const supportQueryButton = document.getElementById('support-query-button');
+            const salesQueryButton = document.getElementById('sales-query-button');
+            const technicalQueryButton = document.getElementById('technical-query-button');
+            
+            if (supportQueryButton) {
+                supportQueryButton.addEventListener('click', () => {
+                    const query = document.getElementById('support-query-input').value;
+                    if (query.trim() !== '') {
+                        // Prefixing the query with role context
+                        handleRoleSpecificQuery(query, 'customer-support');
+                    }
+                });
+            }
+            
+            if (salesQueryButton) {
+                salesQueryButton.addEventListener('click', () => {
+                    const query = document.getElementById('sales-query-input').value;
+                    if (query.trim() !== '') {
+                        handleRoleSpecificQuery(query, 'sales');
+                    }
+                });
+            }
+            
+            if (technicalQueryButton) {
+                technicalQueryButton.addEventListener('click', () => {
+                    const query = document.getElementById('technical-query-input').value;
+                    if (query.trim() !== '') {
+                        handleRoleSpecificQuery(query, 'technical');
+                    }
+                });
+            }
+            
+            // Function to handle role-specific queries
+            function handleRoleSpecificQuery(query, roleType) {
+                // Create a new card to show the answer
+                const answerCard = document.createElement('div');
+                answerCard.className = 'card';
+                answerCard.innerHTML = `
+                    <h3>Answer for: ${query}</h3>
+                    <div class="role-answer">Processing your ${roleType} query...</div>
+                `;
+                
+                // Add the card to the role content
+                document.getElementById(`${roleType}-role`).appendChild(answerCard);
+                
+                // Simulate a fetch request - in the real implementation, you would:
+                // 1. Add the role context to the query
+                // 2. Send to your backend with role information
+                setTimeout(() => {
+                    const answerDiv = answerCard.querySelector('.role-answer');
+                    
+                    // Different mock responses based on role
+                    if (roleType === 'customer-support') {
+                        answerDiv.textContent = "Based on our customer support knowledge base, the answer to your query is: We typically resolve this issue by verifying the customer's account and resetting their credentials. Would you like me to provide a step-by-step guide?";
+                    } else if (roleType === 'sales') {
+                        answerDiv.textContent = "From our sales perspective, I can tell you that our premium package offers the best value with a 15% discount for annual subscriptions. Would you like me to provide more information about pricing tiers?";
+                    } else if (roleType === 'technical') {
+                        answerDiv.textContent = "From a technical standpoint, this is handled through our API using the endpoint POST /api/v2/resources. The correct parameters would be {id: string, config: object}. Would you like me to show a code example?";
+                    }
+                }, 1500);
             }
         });
     </script>
