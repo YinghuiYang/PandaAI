@@ -29,6 +29,7 @@ from simple_pandaaiqa.vector_store import VectorStore
 from simple_pandaaiqa.generator import Generator
 from simple_pandaaiqa.utils.helpers import extract_file_extension
 from simple_pandaaiqa.config import MAX_TEXT_LENGTH
+from simple_pandaaiqa.role_generators import get_role_generator
 
 # Setup logging
 logging.basicConfig(
@@ -41,6 +42,7 @@ logger = logging.getLogger(__name__)
 class QueryRequest(BaseModel):
     text: str = Field(..., description="Query text")
     top_k: int = Field(3, description="Maximum number of results to return")
+    role: str = Field(None, description="Role for the query")
 
 
 class QueryResponse(BaseModel):
@@ -237,8 +239,11 @@ async def query(
                 "context": [],
             }
 
-        # generate answer
-        answer = components["generator"].generate(request.text, results)
+        # Get the appropriate generator for the role
+        generator = get_role_generator(request.role)
+        
+        # Generate answer
+        answer = generator.generate(request.text, results)
         logger.info("Generated answer for the query")
 
         return {"query": request.text, "answer": answer, "context": results}
