@@ -39,7 +39,7 @@ Run the following command to start the service:
 
 ```bash
 python -m simple_pandaaiqa.app
-```ç
+```
 
 Then access in your browser: http://localhost:8000
 
@@ -61,3 +61,7 @@ Steps to use:
 4. Start the LM Studio Server
 
 If LM Studio cannot be connected, the system will automatically display an error message.
+
+## Install ffmpeg
+1. Install ffmpeg from https://ffmpeg.org/download.html
+2. Add ffmpeg to the system path
