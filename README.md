@@ -1,6 +1,9 @@
-# PandaAIQA - Local Knowledge Question Answering System
+# PandaAI Platform 
 
-PandaAIQA is a simple local knowledge question answering system that supports answering questions based on Retrieval Augmented Generation (RAG) technology.
+Picture an intelligent assistant that dives into your local knowledge base, harnessing cutting-edge Retrieval Augmented Generation (RAG) 
+technology to deliver precise answers to your every question! The PandaAI Platform is a versatile powerhouse, supporting text, images, videos, 
+and all sorts of files, while seamlessly adapting to any role—be it a college advisor, customer support guru, technical expert, or even a trusty notetaker. 
+Fully customizable and endlessly adaptable, it empowers you to conquer any scenario with ease!
 
 ## Features
 
