@@ -95,7 +95,7 @@ image_processor = ImageProcessor()
 embedder = Embedder()
 vector_store = VectorStore(embedder=embedder)
 generator = Generator()
-summarize_generator = SummarizeGenerator(language="Korean")
+summarize_generator = SummarizeGenerator()
 
 
 # create global components dictionary
