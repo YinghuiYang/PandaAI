@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PandaAIQA - Local Knowledge QA System</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         :root {
             --primary-color: #4361ee;
@@ -476,7 +477,7 @@
                 <img src="static/images/logo.png" alt="PandaAIQA Logo" class="logo">
             </div>
             <h1>PandaAIQA</h1>
-            <p>Upload documents and ask questions – get answers based on your knowledge base</p>
+            <p>More than Q&A - customizable AI assistant for all scenarios, all roles!</p>
 
             <!-- Add Role Selector -->
             <div class="role-selector">
@@ -720,6 +721,19 @@
                 <div id="summary-spinner" class="spinner"></div>
                 <div id="summary-text" style="white-space: pre-line; margin-top: 15px;"></div>
                 <button id="copy-summary-btn" style="margin-top: 15px; background-color: var(--success-color);">Copy to Clipboard</button>
+            </div>
+        </div>
+
+        <!-- add knowledge base visualization card -->
+        <div class="card">
+            <h2>Knowledge Base Visualization</h2>
+            <p>View the relationships and topic distribution of your documents</p>
+            <button id="generate-visualization-btn">Generate Visualization</button>
+            
+            <div id="visualization-card" style="display:none; margin-top: 20px;">
+                <div id="visualization-spinner" class="spinner"></div>
+                <div id="visualization-container" style="width:100%; height:400px;"></div>
+                <div id="visualization-legend" style="margin-top: 10px; font-size: 0.9em; color: var(--light-text);"></div>
             </div>
         </div>
 
@@ -1355,6 +1369,133 @@
                         console.error('Failed to copy text: ', err);
                     });
             });
+
+            // add visualization function
+            document.getElementById('generate-visualization-btn').addEventListener('click', async function() {
+                const visualizationCard = document.getElementById('visualization-card');
+                const visualizationContainer = document.getElementById('visualization-container');
+                const visualizationSpinner = document.getElementById('visualization-spinner');
+                const visualizationLegend = document.getElementById('visualization-legend');
+                
+                // show loading animation
+                visualizationCard.style.display = 'block';
+                visualizationContainer.innerHTML = '';
+                visualizationLegend.innerHTML = '';
+                visualizationSpinner.style.display = 'inline-block';
+                
+                try {
+                    const response = await fetch('/api/visualization', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to generate visualization');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // check if there is a message
+                    if (data.message) {
+                        visualizationContainer.innerHTML = `<div style="text-align:center; padding:20px;">${data.message}</div>`;
+                        visualizationSpinner.style.display = 'none';
+                        return;
+                    }
+                    
+                    // check if there is data
+                    if (!data.nodes || data.nodes.length === 0) {
+                        visualizationContainer.innerHTML = '<div style="text-align:center; padding:20px;">No enough data for visualization</div>';
+                        visualizationSpinner.style.display = 'none';
+                        return;
+                    }
+                    
+                    // create document relationship network graph
+                    createNetworkGraph(data, visualizationContainer);
+                    
+                    // add legend description
+                    visualizationLegend.innerHTML = 'Legend: Nodes represent documents, lines represent the similarity between documents. Node size represents document length, line width represents similarity.';
+                    
+                } catch (error) {
+                    visualizationContainer.innerHTML = `<div style="text-align:center; padding:20px; color:var(--danger-color);">
+                        Error generating visualization: ${error.message}</div>`;
+                } finally {
+                    visualizationSpinner.style.display = 'none';
+                }
+            });
+            
+            // create document relationship network graph
+            function createNetworkGraph(data, container) {
+                const nodes = data.nodes;
+                const edges = data.edges;
+                
+                // prepare node data
+                const nodeTrace = {
+                    x: nodes.map(node => node.x),
+                    y: nodes.map(node => node.y),
+                    mode: 'markers+text',
+                    marker: {
+                        size: nodes.map(node => Math.max(10, Math.min(30, node.size || 15))),
+                        color: 'rgba(67, 97, 238, 0.8)',
+                        line: { width: 1, color: 'white' }
+                    },
+                    text: nodes.map(node => node.name),
+                    textposition: 'top center',
+                    hoverinfo: 'text',
+                    hovertext: nodes.map(node => `文档: ${node.name}`),
+                    type: 'scatter'
+                };
+                
+                // prepare edge data
+                const edgeTraces = [];
+                
+                for (let i = 0; i < edges.length; i++) {
+                    const edge = edges[i];
+                    const source = nodes[edge.source];
+                    const target = nodes[edge.target];
+                    
+                    edgeTraces.push({
+                        x: [source.x, target.x],
+                        y: [source.y, target.y],
+                        mode: 'lines',
+                        line: {
+                            width: edge.weight * 5, // set line width based on weight
+                            color: 'rgba(212, 212, 212, 0.6)'
+                        },
+                        hoverinfo: 'text',
+                        hovertext: `Similarity: ${Math.round(edge.weight * 100)}%`,
+                        type: 'scatter'
+                    });
+                }
+                
+                // merge all traces
+                const traces = [...edgeTraces, nodeTrace];
+                
+                // set layout
+                const layout = {
+                    title: 'Knowledge Base Document Relationship Graph',
+                    showlegend: false,
+                    hovermode: 'closest',
+                    margin: { l: 30, r: 30, b: 30, t: 50, pad: 4 },
+                    xaxis: {
+                        showgrid: false,
+                        zeroline: false,
+                        showticklabels: false
+                    },
+                    yaxis: {
+                        showgrid: false,
+                        zeroline: false,
+                        showticklabels: false
+                    },
+                    height: 400,
+                    plot_bgcolor: 'rgba(240, 240, 240, 0.5)',
+                    paper_bgcolor: 'rgba(0, 0, 0, 0)'
+                };
+                
+                // create chart
+                Plotly.newPlot(container, traces, layout, {responsive: true});
+            }
         });
     </script>
 </body>

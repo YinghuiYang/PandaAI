@@ -34,6 +34,9 @@ from simple_pandaaiqa.utils.helpers import extract_file_extension
 from simple_pandaaiqa.config import MAX_TEXT_LENGTH
 from simple_pandaaiqa.role_generators import get_role_generator
 from tempfile import NamedTemporaryFile
+import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Setup logging
 logging.basicConfig(
@@ -63,9 +66,9 @@ class StatusResponse(BaseModel):
 
 
 class LMStudioStatusResponse(BaseModel):
-    connected: bool = Field(..., description="LM Studio连接状态")
-    message: str = Field(..., description="连接状态消息")
-    api_base: str = Field(..., description="LM Studio API基础URL")
+    connected: bool = Field(..., description="LM Studio connection status")
+    message: str = Field(..., description="connection status message")
+    api_base: str = Field(..., description="LM Studio API base URL")
 
 
 class MessageResponse(BaseModel):
@@ -94,7 +97,7 @@ vector_store = VectorStore(embedder=embedder)
 generator = Generator()
 summarize_generator = SummarizeGenerator()
 
-# 创建全局组件字典
+# create global components dictionary
 COMPONENTS = {
     "text_processor": text_processor,
     "vector_store": vector_store,
@@ -440,6 +443,101 @@ async def generate_summary():
         return JSONResponse(
             status_code=500,
             content={"error": f"error generating summary: {str(e)}"}
+        )
+
+
+@app.post("/api/visualization")
+async def get_visualization_data():
+    """get knowledge base document visualization data"""
+    try:
+        # get all documents from vector store
+        if 'vector_store' not in globals() or globals()['vector_store'] is None:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "vector store not initialized"}
+            )
+        
+        # get all documents from vector store
+        vs = globals()['vector_store']
+        documents = getattr(vs, 'documents', [])
+        logger.info(f"retrieved {len(documents)} documents for visualization")
+        
+        if not documents:
+            return JSONResponse(
+                status_code=200,
+                content={"nodes": [], "edges": [], "message": "no documents in the knowledge base"}
+            )
+        
+        # extract texts and metadata
+        texts = []
+        doc_names = []
+        
+        for i, doc in enumerate(documents):
+            text = doc.get("text", "")
+            if not text:
+                continue
+                
+            texts.append(text)
+            
+            # get document name
+            metadata = doc.get("metadata", {})
+            source = metadata.get("source", f"document {i+1}")
+            doc_names.append(source)
+        
+        # if there are at least 2 documents, calculate document similarity
+        if len(texts) >= 2:
+            # use TF-IDF to vectorize texts
+            vectorizer = TfidfVectorizer(max_features=100)
+            tfidf_matrix = vectorizer.fit_transform(texts)
+            
+            # use PCA to reduce document vectors to 2D space for visualization
+            pca = PCA(n_components=2)
+            coords = pca.fit_transform(tfidf_matrix.toarray())
+            
+            # calculate document similarity
+            from sklearn.metrics.pairwise import cosine_similarity
+            similarity = cosine_similarity(tfidf_matrix)
+            
+            # create nodes and edges
+            nodes = []
+            edges = []
+            
+            # add nodes
+            for i, name in enumerate(doc_names):
+                nodes.append({
+                    "id": i,
+                    "name": name,
+                    "x": float(coords[i][0]),
+                    "y": float(coords[i][1]),
+                    "size": len(texts[i]) / 1000  # set node size based on text length
+                })
+            
+            # add edges (only keep high similarity connections)
+            for i in range(len(texts)):
+                for j in range(i+1, len(texts)):
+                    if similarity[i, j] > 0.2:  # similarity threshold
+                        edges.append({
+                            "source": i,
+                            "target": j,
+                            "weight": float(similarity[i, j])
+                        })
+            
+            return JSONResponse(
+                status_code=200,
+                content={"nodes": nodes, "edges": edges}
+            )
+        else:
+            # insufficient documents to create network graph
+            return JSONResponse(
+                status_code=200,
+                content={"message": "insufficient documents to create visualization"}
+            )
+            
+    except Exception as e:
+        logger.exception(f"error generating visualization data: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"error generating visualization data: {str(e)}"}
         )
 
 
