@@ -20,19 +20,6 @@ PandaAIQA is a simple local knowledge question answering system that supports an
 pip install -r requirements.txt
 ```
 
-```bash
-pip install "qai-hub-models[easyocr]"
-```
-
-Configure Qualcomm® AI Hub [https://aihub.qualcomm.com/] to run this model on a cloud-hosted device
-Sign-in to Qualcomm® AI Hub with your Qualcomm® ID. Once signed in navigate to Account -> Settings -> API Token.
-
-With this API token, you can configure your client to run models on the cloud hosted devices.
-
-```bash
-qai-hub configure --api_token API_TOKEN
-```
-
 ## Running the Application
 
 Run the following command to start the service:
