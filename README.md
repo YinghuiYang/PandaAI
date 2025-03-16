@@ -25,7 +25,7 @@ Run the following command to start the service:
 
 ```bash
 python -m simple_pandaaiqa.app
-```
+```ç
 
 Then access in your browser: http://localhost:8000
 

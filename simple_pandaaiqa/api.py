@@ -128,7 +128,7 @@ async def upload_file(
 
         # check file type
         ext = extract_file_extension(file.filename)
-        if ext not in ["txt", "md", "csv", "pdf", "mp4", "jpg", "jpeg", "png"]:
+        if ext not in ["txt", "md", "csv", "pdf", "mp4"]:
             logger.warning(f"Unsupported file type: {ext}")
             return JSONResponse(
                 status_code=400,
@@ -173,9 +173,6 @@ async def upload_file(
             documents = components["text_processor"].process_text(text, metadata)
         elif ext == "pdf":
             documents = components["pdf_processor"].process_pdf(content, metadata)
-        elif ext in ["jpg", "jpeg", "png"]:
-            logger.info("Processing image with ImageProcessor...")
-            documents = components["image_processor"].process_image(content)
         # else:  # video files
         # text = components["video_processor"].extract_text_from_video(content)
 
