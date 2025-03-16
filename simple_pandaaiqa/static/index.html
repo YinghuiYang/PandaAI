@@ -708,7 +708,20 @@
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- add summary note function card -->
+        <div class="card">
+            <h2>Summary Note</h2>
+            <p>Generate a comprehensive summary note for all documents in your knowledge base.</p>
+            <button id="generate-summary-btn">Generate Summary Note</button>
+            
+            <div id="summary-card" class="answer-card" style="display:none; margin-top: 20px;">
+                <h3>Summary Note</h3>
+                <div id="summary-spinner" class="spinner"></div>
+                <div id="summary-text" style="white-space: pre-line; margin-top: 15px;"></div>
+                <button id="copy-summary-btn" style="margin-top: 15px; background-color: var(--success-color);">Copy to Clipboard</button>
+            </div>
+        </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -1290,6 +1303,58 @@
                     }, 300);
                 }
             }
+
+            // add summary function
+            document.getElementById('generate-summary-btn').addEventListener('click', async function() {
+                const summaryCard = document.getElementById('summary-card');
+                const summaryText = document.getElementById('summary-text');
+                const summarySpinner = document.getElementById('summary-spinner');
+                
+                // show loading animation
+                summaryCard.style.display = 'block';
+                summaryText.innerText = '';
+                summarySpinner.style.display = 'inline-block';
+                
+                try {
+                    const response = await fetch('/api/summarize', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to generate summary');
+                    }
+                    
+                    const data = await response.json();
+                    summaryText.innerText = data.summary;
+                } catch (error) {
+                    summaryText.innerText = `Error: ${error.message}`;
+                } finally {
+                    summarySpinner.style.display = 'none';
+                }
+            });
+            
+            // copy summary to clipboard
+            document.getElementById('copy-summary-btn').addEventListener('click', function() {
+                const summaryText = document.getElementById('summary-text').innerText;
+                
+                navigator.clipboard.writeText(summaryText)
+                    .then(() => {
+                        const btn = this;
+                        const originalText = btn.innerText;
+                        btn.innerText = 'Copied!';
+                        btn.style.backgroundColor = 'var(--success-color)';
+                        
+                        setTimeout(() => {
+                            btn.innerText = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+            });
         });
     </script>
 </body>

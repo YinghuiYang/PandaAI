@@ -14,6 +14,7 @@ from fastapi import (
     Depends,
     APIRouter,
     BackgroundTasks,
+    Request,
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, FileResponse
@@ -28,6 +29,7 @@ from simple_pandaaiqa.image_processor import ImageProcessor
 from simple_pandaaiqa.embedder import Embedder
 from simple_pandaaiqa.vector_store import VectorStore
 from simple_pandaaiqa.generator import Generator
+from simple_pandaaiqa.summarize_generator import SummarizeGenerator
 from simple_pandaaiqa.utils.helpers import extract_file_extension
 from simple_pandaaiqa.config import MAX_TEXT_LENGTH
 from simple_pandaaiqa.role_generators import get_role_generator
@@ -90,6 +92,17 @@ image_processor = ImageProcessor()
 embedder = Embedder()
 vector_store = VectorStore(embedder=embedder)
 generator = Generator()
+summarize_generator = SummarizeGenerator()
+
+# 创建全局组件字典
+COMPONENTS = {
+    "text_processor": text_processor,
+    "vector_store": vector_store,
+    "generator": generator,
+    "pdf_processor": pdf_processor,
+    "video_processor": video_processor,
+    "summarize_generator": summarize_generator
+}
 
 # Create routers
 main_router = APIRouter(prefix="/api")
@@ -104,17 +117,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Define dependency for components
 def get_components():
-    return {
-        "text_processor": text_processor,
-        "vector_store": vector_store,
-        "generator": generator,
-        "pdf_processor": pdf_processor,
-        "video_processor": video_processor,
-        "image_processor": image_processor,
-    }
+        
+    return COMPONENTS
+
+
+@app.on_event("startup")
+async def startup_event():
+    """initialize components"""
+    app.state.components = COMPONENTS
+    logger.info("application started, components initialized")
 
 
 @app.get("/")
@@ -360,6 +373,73 @@ async def load_knowledge_base(
     except Exception as e:
         logger.error(f"Error loading knowledge base: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# safe get vector store dependency function
+def get_vector_store():
+    """safe get global vector_store object"""
+    return vector_store
+
+# safe get summarize generator dependency function
+def get_summarize_generator():
+    """safe get or create summarize generator"""
+    return summarize_generator
+
+@app.post("/api/summarize")
+async def generate_summary():
+    """generate summary of all documents in the knowledge base"""
+    import traceback
+    try:
+    
+        
+        # check current vector store
+        current_vs = None
+        
+        # try to get existing vector store
+        try:
+            # first try to use global variable
+            if 'vector_store' in globals() and globals()['vector_store'] is not None:
+                current_vs = globals()['vector_store']
+                logger.info("using global vector store")
+            # then try to get from COMPONENTS
+            elif 'COMPONENTS' in globals() and globals()['COMPONENTS'].get('vector_store') is not None:
+                current_vs = globals()['COMPONENTS']['vector_store']
+                logger.info("using vector store from COMPONENTS")
+        except Exception as e:
+            logger.error(f"error getting existing vector store: {e}")
+            # continue to execute, we will create a new vector store
+        
+        # if cannot get existing vector store, create a new one
+        if current_vs is None:
+            logger.info("creating new vector store")
+            temp_embedder = Embedder()
+            current_vs = VectorStore(embedder=temp_embedder)
+        
+        # get documents
+        documents = getattr(current_vs, 'documents', [])
+        logger.info(f"retrieved {len(documents)} documents for summary")
+        
+        if not documents:
+            return JSONResponse(
+                status_code=200,
+                content={"summary": "no documents in the knowledge base. please upload documents first."}
+            )
+        
+        # create summarize generator and generate summary
+        summarizer = SummarizeGenerator()
+        summary = summarizer.generate_summary(documents)
+        
+        return JSONResponse(
+            status_code=200,
+            content={"summary": summary}
+        )
+    except Exception as e:
+        error_trace = traceback.format_exc()
+        logger.error(f"error generating summary: {e}\n{error_trace}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"error generating summary: {str(e)}"}
+        )
 
 
 # Mount static files

@@ -30,7 +30,7 @@ class VectorStore:
     def __init__(self, embedder: Optional[Embedder] = None):
         """Initialize vector store"""
         self.embedder = embedder
-        # 创建文档存储和存储上下文
+        # create the document store and storage context
         self.document_store = SimpleDocumentStore()
         self.storage_context = StorageContext.from_defaults(
             docstore=self.document_store
@@ -38,15 +38,15 @@ class VectorStore:
         
         self.node_parser = SentenceSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
         
-        # 使用HuggingFace嵌入模型
+        # use the HuggingFace embedding model
         self.embed_model = HuggingFaceEmbedding(
             model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
-        # 设置全局嵌入模型
+        # set the global embedding model
         Settings.embed_model = self.embed_model
             
         self.index = None
-        self.documents = []  # Keep for backward compatibility
+        self.documents = []  # keep for backward compatibility
         logger.info("Initialized vector store with llama_index")
     
     def add_texts(self, texts: List[str], metadatas: Optional[List[Dict[str, Any]]] = None) -> List[int]:
@@ -88,7 +88,7 @@ class VectorStore:
             
             # Create or update the index
             if self.index is None:
-                # 使用当前设置的embedding模型
+                # use the current set embedding model
                 self.index = VectorStoreIndex.from_documents(
                     llama_docs,
                     storage_context=self.storage_context,
@@ -175,7 +175,7 @@ class VectorStore:
     def clear(self) -> None:
         """Clear all documents and vectors from the store"""
         try:
-            # 重新创建文档存储和存储上下文
+            # recreate the document store and storage context
             self.document_store = SimpleDocumentStore()
             self.storage_context = StorageContext.from_defaults(
                 docstore=self.document_store
@@ -225,16 +225,16 @@ class VectorStore:
                 logger.warning(f"Directory {directory} does not exist")
                 return False
                 
-            # 使用最新版本的加载方法
-            # 先加载存储上下文
+            # use the latest loading method
+            # first load the storage context
             storage_context = StorageContext.from_defaults(persist_dir=directory)
-            # 使用加载的存储上下文创建索引
+            # use the loaded storage context to create the index
             self.index = VectorStoreIndex.from_storage(storage_context)
             self.storage_context = storage_context
             
-            # 重建documents列表以保持向后兼容性
+            # rebuild the documents list to maintain backward compatibility
             self.documents = []
-            # 遍历文档存储中的所有文档
+            # iterate through all documents in the document store
             if hasattr(self.index, 'docstore') and hasattr(self.index.docstore, 'docs'):
                 for node_id, node in self.index.docstore.docs.items():
                     if hasattr(node, 'text'):
@@ -247,4 +247,52 @@ class VectorStore:
             return True
         except Exception as e:
             logger.error(f"Error loading vector store: {e}", exc_info=True)
-            return False 
+            return False
+
+    def list_collections(self) -> List[str]:
+        """List all collections in the VectorStore."""
+        collections = self.client.get_collections()
+        return [c.name for c in collections.collections]
+
+    def get_all_documents(self) -> List[Dict[str, Any]]:
+        """
+        Get all documents from all collections in the vector store
+        
+        Returns:
+            List of documents with text and metadata
+        """
+        logger.info("Retrieving all documents from vector store")
+        all_documents = []
+        
+        try:
+            collections = self.client.get_collections()
+            for collection in collections.collections:
+                collection_name = collection.name
+                
+                # skip the system collection or non-document collection
+                if collection_name.startswith("_") or collection_name == "default":
+                    continue
+                    
+                # get all documents from the collection
+                docs = self.client.get(
+                    collection_name=collection_name,
+                    include=["metadatas", "documents"],
+                    limit=10000  # set a large limit value
+                )
+                
+                # process the documents
+                if docs and docs['ids']:
+                    for i, doc_id in enumerate(docs['ids']):
+                        document = {
+                            "id": doc_id,
+                            "text": docs['documents'][i] if docs['documents'] else "",
+                            "metadata": docs['metadatas'][i] if docs['metadatas'] else {}
+                        }
+                        all_documents.append(document)
+                        
+            logger.info(f"Retrieved {len(all_documents)} documents in total")
+            return all_documents
+            
+        except Exception as e:
+            logger.error(f"Error retrieving documents: {e}")
+            return [] 
