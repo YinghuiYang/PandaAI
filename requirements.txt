@@ -9,3 +9,6 @@ llama-index-embeddings-huggingface>=0.1.0
 sentence-transformers>=2.2.2 
 PyPDF2
 openai-whisper
+torch
+qai-hub
+qai-hub-models
