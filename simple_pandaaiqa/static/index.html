@@ -467,6 +467,45 @@
             }
         }
 
+        .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+        }
+
+        .toggle-label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .toggle-button {
+            width: 80px;
+            height: 40px; /* Set a fixed height for better alignment */
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center the text */
+            transition: all 0.3s ease;
+        }
+
+
+        .toggle-button.npu {
+            background-color: var(--danger-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
     </style>
 </head>
 
@@ -476,9 +515,9 @@
             <div class="logo-container">
                 <img src="static/images/logo.png" alt="PandaAIQA Logo" class="logo">
             </div>
-            <h1>PANDA AI</h1>
+            <h1>PandaAIQA</h1>
             <p>More than Q&A - customizable AI assistant for all scenarios, all roles!</p>
-
+            
             <!-- Add Role Selector -->
             <div class="role-selector">
                 <button id="role-selector-button" class="role-selector-button">
@@ -1497,6 +1536,32 @@
                 Plotly.newPlot(container, traces, layout, {responsive: true});
             }
         });
+        
+        document.addEventListener('DOMContentLoaded', function () {
+        const toggleButton = document.getElementById('toggle-button');
+
+        // Load last selected mode from localStorage
+        let currentMode = localStorage.getItem('processingMode') || 'CPU';
+        toggleButton.textContent = currentMode;
+        if (currentMode === 'NPU') {
+            toggleButton.classList.add('NPU');
+        }
+
+        toggleButton.addEventListener('click', function () {
+            if (toggleButton.textContent === 'CPU') {
+                toggleButton.textContent = 'NPU';
+                toggleButton.classList.add('NPU');
+                localStorage.setItem('processingMode', 'NPU');
+            } else {
+                toggleButton.textContent = 'CPU';
+                toggleButton.classList.remove('NPU');
+                localStorage.setItem('processingMode', 'CPU');
+            }
+
+            // Log the selected mode (for API or debugging)
+            console.log(`Processing mode switched to: ${toggleButton.textContent}`);
+        });
+    });
     </script>
 </body>
 
