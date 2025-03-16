@@ -16,8 +16,31 @@ PandaAIQA is a simple local knowledge question answering system that supports an
 1. Clone the repository
 2. Install dependencies
 
+
 ```bash
 pip install -r requirements.txt
+```
+
+
+
+## For Advanced Feature (video and image file input), you can skip this if you only have txt based file!
+1. We need Rust compiler(https://www.rust-lang.org/tools/install)
+
+```bash
+pip install -r videorequirements.txt
+```
+
+```bash
+pip install "qai-hub-models[easyocr]"
+```
+
+Configure Qualcomm® AI Hub [https://aihub.qualcomm.com/] to run this model on a cloud-hosted device
+Sign-in to Qualcomm® AI Hub with your Qualcomm® ID. Once signed in navigate to Account -> Settings -> API Token.
+
+With this API token, you can configure your client to run models on the cloud hosted devices.
+
+```bash
+qai-hub configure --api_token API_TOKEN
 ```
 
 ## Running the Application
