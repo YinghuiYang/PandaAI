@@ -21,14 +21,12 @@ class SummarizeGenerator:
                  api_base: str = LM_STUDIO_API_BASE, 
                  model: str = LM_STUDIO_MODEL,
                  max_tokens: int = LM_STUDIO_MAX_TOKENS,
-                 temperature: float = 0.3,  # reduce the temperature, make the output more deterministic
-                 language: str = "Korean"):  # Default to Korean
+                 temperature: float = 0.3):  # reduce the temperature, make the output more deterministic
         """initialize the summary generator"""
         self.api_base = api_base
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
-        self.language = language
         
         logger.info(f"initialize the summary generator, API base URL: {api_base}")
     
