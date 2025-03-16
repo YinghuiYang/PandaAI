@@ -1,6 +1,6 @@
 """
 Generator module for PandaAIQA
-Handles text generation using LM Studio API
+Handles text generation using AnythingLLM API
 """
 
 import requests
@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 class NPU_Generator:
-    """text generator class, using LM Studio API to generate replies"""
+    """text generator class, using AnythingLLM API to generate replies"""
     
     def __init__(self, 
                  api_base: str = ANYTHINGLLM_API_BASE, 
@@ -44,7 +44,7 @@ class NPU_Generator:
     
     def check_connection(self) -> Tuple[bool, str]:
         """
-        check connection status with LM Studio
+        check connection status with AnythingLLM
         
         :return:
             Tuple[bool, str]: (connection status, status message)
@@ -59,23 +59,23 @@ class NPU_Generator:
             
             # check response
             if response.status_code == 200:
-                logger.info("LM Studio connection successful")
-                return True, "LM Studio connection successful"
+                logger.info("AnythingLLM connection successful")
+                return True, "AnythingLLM connection successful"
             else:
-                logger.error(f"LM Studio connection failed: HTTP {response.status_code}, {response.text}")
-                return False, f"LM Studio connection failed: HTTP {response.status_code}"
+                logger.error(f"AnythingLLM connection failed: HTTP {response.status_code}, {response.text}")
+                return False, f"AnythingLLM connection failed: HTTP {response.status_code}"
         
         except requests.exceptions.ConnectTimeout:
-            logger.error("LM Studio connection timeout")
-            return False, "LM Studio connection timeout, please confirm the service has been started"
+            logger.error("AnythingLLM connection timeout")
+            return False, "AnythingLLM connection timeout, please confirm the service has been started"
         
         except requests.exceptions.ConnectionError:
-            logger.error(f"LM Studio connection failed: {self.api_base}")
-            return False, f"LM Studio connection failed, please confirm the service has been started and check the URL: {self.api_base}"
+            logger.error(f"AnythingLLM connection failed: {self.api_base}")
+            return False, f"AnythingLLM connection failed, please confirm the service has been started and check the URL: {self.api_base}"
         
         except Exception as e:
-            logger.error(f"Error checking LM Studio connection: {str(e)}", exc_info=True)
-            return False, f"Error checking LM Studio connection: {str(e)}"
+            logger.error(f"Error checking AnythingLLM connection: {str(e)}", exc_info=True)
+            return False, f"Error checking AnythingLLM connection: {str(e)}"
     
     def generate(self, query: str, context: List[Dict[str, Any]]) -> str:
         """
@@ -121,7 +121,7 @@ class NPU_Generator:
             if response.status_code == 200:
                 result = response.json()
                 if "choices" in result and len(result["choices"]) > 0:
-                    logger.info("Successfully got reply from LM Studio")
+                    logger.info("Successfully got reply from AnythingLLM")
                     # completions API returns a different format from chat
                     return result["choices"][0]["text"].strip()
             
