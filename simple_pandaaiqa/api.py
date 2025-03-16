@@ -22,7 +22,6 @@ from pydantic import BaseModel, Field
 
 from simple_pandaaiqa.text_processor import TextProcessor
 from simple_pandaaiqa.pdf_processor import PDFProcessor
-from simple_pandaaiqa.image_processor import ImageProcessor
 
 # from simple_pandaaiqa.video_processor import VideoProcessor
 from simple_pandaaiqa.embedder import Embedder
@@ -81,7 +80,6 @@ app = FastAPI(title="PandaAIQA", description="本地知识问答系统")
 # Initialize components
 text_processor = TextProcessor()
 pdf_processor = PDFProcessor()
-image_processor = ImageProcessor()
 embedder = Embedder()
 vector_store = VectorStore(embedder=embedder)
 generator = Generator()
@@ -107,7 +105,6 @@ def get_components():
         "vector_store": vector_store,
         "generator": generator,
         "pdf_processor": pdf_processor,
-        "image_processor": image_processor,
         # "video_processor": video_processor,
     }
 
