@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 from simple_pandaaiqa.text_processor import TextProcessor
 from simple_pandaaiqa.pdf_processor import PDFProcessor
 from simple_pandaaiqa.video_processor import VideoProcessor
+from simple_pandaaiqa.image_processor import ImageProcessor
 
 from simple_pandaaiqa.embedder import Embedder
 from simple_pandaaiqa.vector_store import VectorStore
@@ -84,6 +85,8 @@ app = FastAPI(title="PandaAIQA", description="本地知识问答系统")
 text_processor = TextProcessor()
 pdf_processor = PDFProcessor()
 video_processor = VideoProcessor()
+image_processor = ImageProcessor()
+
 embedder = Embedder()
 vector_store = VectorStore(embedder=embedder)
 generator = Generator()
@@ -110,6 +113,7 @@ def get_components():
         "generator": generator,
         "pdf_processor": pdf_processor,
         "video_processor": video_processor,
+        "image_processor": image_processor,
     }
 
 
@@ -129,12 +133,23 @@ async def upload_file(
 
         # check file type
         ext = extract_file_extension(file.filename)
-        if ext not in ["txt", "md", "csv", "pdf", "mp4"]:
+        if ext not in [
+            "txt",
+            "md",
+            "csv",
+            "pdf",
+            "mp4",
+            "jpg",
+            "jpeg",
+            "png",
+            "bmp",
+            "gif",
+        ]:
             logger.warning(f"Unsupported file type: {ext}")
             return JSONResponse(
                 status_code=400,
                 content={
-                    "message": f"Unsupported file type: {ext}. Only txt, md, and csv files are supported"
+                    "message": f"Unsupported file type: {ext}. Only txt, md, csv, pdf, mp4, jpg, jpeg, png, bmp, gif are supported"
                 },
             )
 
@@ -174,6 +189,8 @@ async def upload_file(
             documents = components["text_processor"].process_text(text, metadata)
         elif ext == "pdf":
             documents = components["pdf_processor"].process_pdf(content, metadata)
+        elif ext in ["jpg", "jpeg", "png", "bmp", "gif"]:
+            documents = components["image_processor"].process_image(content)
         else:  # video files
             with NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
                 tmp_file.write(content)
@@ -230,7 +247,7 @@ async def query(
 
         # Get the appropriate generator for the role
         generator = get_role_generator(request.role)
-        
+
         # Generate answer
         answer = generator.generate(request.text, results)
         logger.info("Generated answer for the query")

@@ -30,6 +30,9 @@ pip install -r requirements.txt
 1. Install ffmpeg from https://ffmpeg.org/download.html
 2. Add ffmpeg to the system path
 
+### Install Tesseract (do not forget this step if you want to upload image : )
+1. Install Tesseract from https://github.com/tesseract-ocr/tesseract?tab=readme-ov-file#installing-tesseract
+2. Add Tesseract to the system path
 
 ```bash
 pip install -r videorequirements.txt

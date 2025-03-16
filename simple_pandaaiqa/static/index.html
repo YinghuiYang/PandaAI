@@ -369,7 +369,7 @@
             display: inline-block;
             margin-top: 1rem;
         }
-        
+
         .role-selector-button {
             padding: 10px 15px;
             background-color: var(--primary-color);
@@ -382,11 +382,11 @@
             align-items: center;
             font-family: 'Poppins', sans-serif;
         }
-        
+
         .role-selector-button:hover {
             background-color: var(--hover-color);
         }
-        
+
         .role-dropdown {
             position: absolute;
             top: 100%;
@@ -400,32 +400,32 @@
             font-family: 'Poppins', sans-serif;
             display: none;
         }
-        
+
         .role-dropdown.active {
             display: block;
             animation: fadeIn 0.2s ease;
         }
-        
+
         .role-option {
             padding: 12px 15px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
             transition: background-color 0.2s;
         }
-        
+
         .role-option:last-child {
             border-bottom: none;
         }
-        
+
         .role-option:hover {
             background-color: #f5f5f5;
         }
-        
+
         .role-option.active {
             background-color: rgba(67, 97, 238, 0.1);
             font-weight: 500;
         }
-        
+
         /* Role-specific content areas */
         .role-content {
             display: none;
@@ -435,15 +435,22 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
-        
+
         .role-content.active {
             display: block;
             animation: fadeIn 0.3s ease;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -453,7 +460,7 @@
         <header>
             <h1>PandaAIQA</h1>
             <p>Upload documents and ask questions – get answers based on your knowledge base</p>
-            
+
             <!-- Add Role Selector -->
             <div class="role-selector">
                 <button id="role-selector-button" class="role-selector-button">
@@ -482,10 +489,10 @@
         <div id="default-role" class="role-content active">
             <div class="card">
                 <h2>Step 1: Upload Documents</h2>
-                <p>Supported file types: TXT, MD, CSV</p>
+                <p>Supported file types: TXT, MD, CSV, PDF, MP4, JPG, JPEG, PNG, BMP, GIF</p>
                 <div id="file-upload" class="file-upload">
                     <p>Click or drag & drop files here to upload</p>
-                    <input type="file" id="file-input" accept=".txt,.md,.csv,.pdf,.mp4">
+                    <input type="file" id="file-input" accept=".txt,.md,.csv,.pdf,.mp4,.jpg,.jpeg,.png,.bmp,.gif">
                 </div>
                 <div id="upload-message" class="message" style="display: none;"></div>
             </div>
@@ -506,7 +513,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Customer Support Role Content -->
         <div id="customer-support-role" class="role-content">
             <!-- Add file upload card -->
@@ -515,11 +522,12 @@
                 <p>Upload customer service protocols, FAQs, and support guides</p>
                 <div id="support-file-upload" class="file-upload">
                     <p>Click or drag & drop files here to upload</p>
-                    <input type="file" id="support-file-input" accept=".txt,.md,.csv,.pdf" onload="console.log('Support file input loaded')">
+                    <input type="file" id="support-file-input" accept=".txt,.md,.csv,.pdf"
+                        onload="console.log('Support file input loaded')">
                 </div>
                 <div id="support-upload-message" class="message" style="display: none;"></div>
             </div>
-            
+
             <div class="card">
                 <h2>Customer Support Portal</h2>
                 <div class="support-dashboard">
@@ -547,13 +555,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="query-box" style="margin-top: 20px;">
                     <input type="text" id="support-query-input" placeholder="Ask a customer support question...">
                     <button id="support-query-button">Ask</button>
                 </div>
             </div>
-            
+
             <div class="card">
                 <h2>Knowledge Base</h2>
                 <ul class="kb-list">
@@ -564,7 +572,7 @@
                 </ul>
             </div>
         </div>
-        
+
         <!-- Sales Representative Role Content -->
         <div id="sales-role" class="role-content">
             <!-- Add file upload card -->
@@ -573,11 +581,12 @@
                 <p>Upload product descriptions, pricing, and sales scripts</p>
                 <div id="sales-file-upload" class="file-upload">
                     <p>Click or drag & drop files here to upload</p>
-                    <input type="file" id="sales-file-input" accept=".txt,.md,.csv,.pdf" onload="console.log('Sales file input loaded')">
+                    <input type="file" id="sales-file-input" accept=".txt,.md,.csv,.pdf"
+                        onload="console.log('Sales file input loaded')">
                 </div>
                 <div id="sales-upload-message" class="message" style="display: none;"></div>
             </div>
-            
+
             <div class="card">
                 <h2>Sales Dashboard</h2>
                 <div class="sales-metrics">
@@ -595,7 +604,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="card">
                 <h2>Lead Management</h2>
                 <div class="lead-list">
@@ -615,14 +624,14 @@
                         <div class="lead-value">$5,000</div>
                     </div>
                 </div>
-                
+
                 <div class="query-box" style="margin-top: 20px;">
                     <input type="text" id="sales-query-input" placeholder="Ask about sales strategies or products...">
                     <button id="sales-query-button">Ask</button>
                 </div>
             </div>
         </div>
-        
+
         <!-- Technical Specialist Role Content -->
         <div id="technical-role" class="role-content">
             <!-- Add file upload card -->
@@ -631,11 +640,12 @@
                 <p>Upload API documentation, guides, and technical specifications</p>
                 <div id="technical-file-upload" class="file-upload">
                     <p>Click or drag & drop files here to upload</p>
-                    <input type="file" id="technical-file-input" accept=".txt,.md,.csv,.pdf,.json" onload="console.log('Technical file input loaded')">
+                    <input type="file" id="technical-file-input" accept=".txt,.md,.csv,.pdf,.json"
+                        onload="console.log('Technical file input loaded')">
                 </div>
                 <div id="technical-upload-message" class="message" style="display: none;"></div>
             </div>
-            
+
             <div class="card">
                 <h2>Technical Documentation</h2>
                 <div class="doc-categories">
@@ -657,7 +667,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="card">
                 <h2>Technical Support</h2>
                 <div class="system-status">
@@ -674,7 +684,7 @@
                         <span class="status-value">Degraded Performance</span>
                     </div>
                 </div>
-                
+
                 <div class="query-box" style="margin-top: 20px;">
                     <input type="text" id="technical-query-input" placeholder="Ask a technical question...">
                     <button id="technical-query-button">Ask</button>
@@ -705,11 +715,11 @@
             const supportFileUpload = document.getElementById('support-file-upload');
             const supportFileInput = document.getElementById('support-file-input');
             const supportUploadMessage = document.getElementById('support-upload-message');
-            
+
             const salesFileUpload = document.getElementById('sales-file-upload');
             const salesFileInput = document.getElementById('sales-file-input');
             const salesUploadMessage = document.getElementById('sales-upload-message');
-            
+
             const technicalFileUpload = document.getElementById('technical-file-upload');
             const technicalFileInput = document.getElementById('technical-file-input');
             const technicalUploadMessage = document.getElementById('technical-upload-message');
@@ -847,7 +857,7 @@
                 console.log(`Uploading file for role: ${role}`);
                 const formData = new FormData();
                 formData.append('file', file);
-                
+
                 // Add role metadata if not default
                 if (role !== 'default') {
                     formData.append('role', role);
@@ -860,18 +870,18 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        showMessage(messageElement, data.message, 'success');
-                        checkStatus();
-                    } else {
-                        showMessage(messageElement, 'Upload failed: ' + (data.detail || 'Unknown error'), 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage(messageElement, 'Upload error: ' + error.message, 'error');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            showMessage(messageElement, data.message, 'success');
+                            checkStatus();
+                        } else {
+                            showMessage(messageElement, 'Upload failed: ' + (data.detail || 'Unknown error'), 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showMessage(messageElement, 'Upload error: ' + error.message, 'error');
+                    });
 
                 // Reset file input based on role
                 let inputToReset;
@@ -1027,49 +1037,49 @@
             const roleOptions = document.querySelectorAll('.role-option');
             const currentRoleText = document.getElementById('current-role');
             const roleContents = document.querySelectorAll('.role-content');
-            
+
             // Toggle dropdown
             roleSelectorButton.addEventListener('click', () => {
                 roleDropdown.classList.toggle('active');
             });
-            
+
             // Close dropdown when clicking outside
             document.addEventListener('click', (event) => {
                 if (!roleSelectorButton.contains(event.target) && !roleDropdown.contains(event.target)) {
                     roleDropdown.classList.remove('active');
                 }
             });
-            
+
             // Role selection
             roleOptions.forEach(option => {
                 option.addEventListener('click', () => {
                     // Update active option styling
                     roleOptions.forEach(opt => opt.classList.remove('active'));
                     option.classList.add('active');
-                    
+
                     // Update current role text
                     currentRoleText.textContent = option.textContent;
-                    
+
                     // Hide dropdown
                     roleDropdown.classList.remove('active');
-                    
+
                     // Show appropriate content
                     const selectedRole = option.getAttribute('data-role');
                     roleContents.forEach(content => {
                         content.classList.remove('active');
                     });
                     document.getElementById(`${selectedRole}-role`).classList.add('active');
-                    
+
                     // Log role change (for debugging)
                     console.log(`Role changed to: ${selectedRole}`);
                 });
             });
-            
+
             // Add additional role-specific query handlers
             const supportQueryButton = document.getElementById('support-query-button');
             const salesQueryButton = document.getElementById('sales-query-button');
             const technicalQueryButton = document.getElementById('technical-query-button');
-            
+
             if (supportQueryButton) {
                 supportQueryButton.addEventListener('click', () => {
                     const query = document.getElementById('support-query-input').value;
@@ -1079,7 +1089,7 @@
                     }
                 });
             }
-            
+
             if (salesQueryButton) {
                 salesQueryButton.addEventListener('click', () => {
                     const query = document.getElementById('sales-query-input').value;
@@ -1088,7 +1098,7 @@
                     }
                 });
             }
-            
+
             if (technicalQueryButton) {
                 technicalQueryButton.addEventListener('click', () => {
                     const query = document.getElementById('technical-query-input').value;
@@ -1097,12 +1107,12 @@
                     }
                 });
             }
-            
+
             // Function to handle role-specific queries
             function handleRoleSpecificQuery(query, roleType) {
                 // Create a new card to show the answer if it doesn't exist yet
                 let roleAnswerCard = document.querySelector(`.${roleType}-answer-card`);
-                
+
                 if (!roleAnswerCard) {
                     roleAnswerCard = document.createElement('div');
                     roleAnswerCard.className = `card ${roleType}-answer-card`;
@@ -1112,27 +1122,27 @@
                         <h3>Relevant Context</h3>
                         <div class="role-context-container"></div>
                     `;
-                    
+
                     // Add the card to the role content
                     document.getElementById(`${roleType}-role`).appendChild(roleAnswerCard);
                 } else {
                     // If answer card already exists, update the text
                     const answerDiv = roleAnswerCard.querySelector('.role-answer');
                     answerDiv.textContent = "Processing your query...";
-                    
+
                     // Clear previous context
                     const contextContainer = roleAnswerCard.querySelector('.role-context-container');
                     if (contextContainer) {
                         contextContainer.innerHTML = '';
                     }
                 }
-                
+
                 // Add role context to the query
                 const contextualizedQuery = addRoleContext(query, roleType);
-                
+
                 // Show a notification
                 showNotification(`Processing ${roleType} query...`, 'info', `${roleType}-query`);
-                
+
                 // Actually call the query API endpoint
                 fetch(QUERY_URL, {
                     method: 'POST',
@@ -1145,57 +1155,57 @@
                         role: roleType // Include role information for the backend
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    // Remove notification
-                    removeNotification(`${roleType}-query`);
-                    
-                    // Display answer
-                    const answerDiv = roleAnswerCard.querySelector('.role-answer');
-                    answerDiv.textContent = data.answer || 'No answer available.';
-                    
-                    // Display context
-                    const contextContainer = roleAnswerCard.querySelector('.role-context-container');
-                    if (contextContainer) {
-                        contextContainer.innerHTML = '';
-                        
-                        if (data.context && data.context.length > 0) {
-                            data.context.forEach(item => {
-                                const contextItem = document.createElement('div');
-                                contextItem.className = 'context-item';
-                                
-                                const source = item.metadata && item.metadata.source
-                                    ? `<strong>Source: ${item.metadata.source}</strong>`
-                                    : '';
-                                
-                                contextItem.innerHTML = `
+                    .then(response => response.json())
+                    .then(data => {
+                        // Remove notification
+                        removeNotification(`${roleType}-query`);
+
+                        // Display answer
+                        const answerDiv = roleAnswerCard.querySelector('.role-answer');
+                        answerDiv.textContent = data.answer || 'No answer available.';
+
+                        // Display context
+                        const contextContainer = roleAnswerCard.querySelector('.role-context-container');
+                        if (contextContainer) {
+                            contextContainer.innerHTML = '';
+
+                            if (data.context && data.context.length > 0) {
+                                data.context.forEach(item => {
+                                    const contextItem = document.createElement('div');
+                                    contextItem.className = 'context-item';
+
+                                    const source = item.metadata && item.metadata.source
+                                        ? `<strong>Source: ${item.metadata.source}</strong>`
+                                        : '';
+
+                                    contextItem.innerHTML = `
                                     ${source}
                                     <p>${item.text}</p>
                                     <div class="context-meta">
                                         <small>Relevance: ${(item.score * 100).toFixed(1)}%</small>
                                     </div>
                                 `;
-                                
-                                contextContainer.appendChild(contextItem);
-                            });
-                        } else {
-                            contextContainer.innerHTML = '<p>No relevant context found</p>';
+
+                                    contextContainer.appendChild(contextItem);
+                                });
+                            } else {
+                                contextContainer.innerHTML = '<p>No relevant context found</p>';
+                            }
                         }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error in role-specific query:', error);
-                    
-                    // Remove notification
-                    removeNotification(`${roleType}-query`);
-                    
-                    // Show error message
-                    const answerDiv = roleAnswerCard.querySelector('.role-answer');
-                    answerDiv.textContent = `Error: ${error.message}`;
-                    
-                    // Show notification
-                    showNotification('Query error: ' + error.message, 'error');
-                });
+                    })
+                    .catch(error => {
+                        console.error('Error in role-specific query:', error);
+
+                        // Remove notification
+                        removeNotification(`${roleType}-query`);
+
+                        // Show error message
+                        const answerDiv = roleAnswerCard.querySelector('.role-answer');
+                        answerDiv.textContent = `Error: ${error.message}`;
+
+                        // Show notification
+                        showNotification('Query error: ' + error.message, 'error');
+                    });
             }
 
             // Helper function to add role-specific context to queries
@@ -1205,7 +1215,7 @@
                     'sales': 'As a sales representative, ',
                     'technical': 'As a technical specialist, '
                 };
-                
+
                 return roleContexts[roleType] ? `${roleContexts[roleType]}${query}` : query;
             }
 
@@ -1219,12 +1229,12 @@
                     notificationsContainer.className = 'notifications';
                     document.body.appendChild(notificationsContainer);
                 }
-                
+
                 // Create the notification
                 const notification = document.createElement('div');
                 notification.className = `notification ${type}`;
                 notification.textContent = message;
-                
+
                 // Add ID if provided
                 if (id) {
                     notification.id = `notification-${id}`;
@@ -1234,10 +1244,10 @@
                         notificationsContainer.removeChild(existingNotification);
                     }
                 }
-                
+
                 // Add to container
                 notificationsContainer.appendChild(notification);
-                
+
                 // Auto dismiss if not an error
                 if (type !== 'error' && !id) {
                     setTimeout(() => {
