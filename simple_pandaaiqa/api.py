@@ -23,14 +23,15 @@ from pydantic import BaseModel, Field
 from simple_pandaaiqa.text_processor import TextProcessor
 from simple_pandaaiqa.pdf_processor import PDFProcessor
 from simple_pandaaiqa.image_processor import ImageProcessor
+from simple_pandaaiqa.video_processor import VideoProcessor
 
-# from simple_pandaaiqa.video_processor import VideoProcessor
 from simple_pandaaiqa.embedder import Embedder
 from simple_pandaaiqa.vector_store import VectorStore
 from simple_pandaaiqa.generator import Generator
 from simple_pandaaiqa.utils.helpers import extract_file_extension
 from simple_pandaaiqa.config import MAX_TEXT_LENGTH
 from simple_pandaaiqa.role_generators import get_role_generator
+from tempfile import NamedTemporaryFile
 
 # Setup logging
 logging.basicConfig(
@@ -84,6 +85,7 @@ app = FastAPI(title="PandaAIQA", description="本地知识问答系统")
 text_processor = TextProcessor()
 pdf_processor = PDFProcessor()
 image_processor = ImageProcessor()
+video_processor = VideoProcessor()
 embedder = Embedder()
 vector_store = VectorStore(embedder=embedder)
 generator = Generator()
@@ -111,6 +113,7 @@ def get_components():
         "pdf_processor": pdf_processor,
         "image_processor": image_processor,
         # "video_processor": video_processor,
+        "video_processor": video_processor,
     }
 
 
@@ -146,11 +149,11 @@ async def upload_file(
         if (
             len(content) > MAX_TEXT_LENGTH * 2
         ):  # allow file to be slightly larger than pure text
-            logger.warning(f"File too large: {len(content)} bytes")
+            logger.warning(f"File too small: {len(content)} bytes")
             return JSONResponse(
                 status_code=400,
                 content={
-                    "message": f"File too large. Maximum allowed size is {MAX_TEXT_LENGTH * 2} bytes"
+                    "message": f"File too small. Maximum allowed size is {MAX_TEXT_LENGTH * 2} bytes"
                 },
             )
 
@@ -178,29 +181,16 @@ async def upload_file(
         elif ext in ["jpg", "jpeg", "png"]:
             logger.info("Processing image with ImageProcessor...")
             documents = components["image_processor"].process_image(content)
-        # else:  # video files
-        # text = components["video_processor"].extract_text_from_video(content)
+        else:  # video files
+            with NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
+                tmp_file.write(content)
+                tmp_file.flush()
+                video_file_path = tmp_file.name
+            documents = components["video_processor"].process_video(
+                video_file_path, metadata
+            )
 
-        # # decode text
-        # try:
-        #     text = content.decode("utf-8")
-        # except UnicodeDecodeError:
-        #     # try other encodings
-        #     try:
-        #         text = content.decode("latin-1")
-        #         logger.info("Using latin-1 encoding to decode file")
-        #     except:
-        #         logger.error("Failed to decode file content")
-        #         return JSONResponse(
-        #             status_code=400,
-        #             content={
-        #                 "message": "Failed to decode file content. Please ensure the file is a valid text file"
-        #             },
-        #         )
-
-        # # process text
-        # # metadata = {"source": file.filename, "type": "file"}
-        # documents = components["text_processor"].process_text(text, metadata)
+            os.unlink(tmp_file.name)
 
         if not documents:
             logger.warning("No documents generated from file")

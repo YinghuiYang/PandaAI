@@ -16,8 +16,23 @@ PandaAIQA is a simple local knowledge question answering system that supports an
 1. Clone the repository
 2. Install dependencies
 
+
 ```bash
 pip install -r requirements.txt
+```
+
+
+
+## For Advanced Feature (video and image file input), you can skip this if you only have txt based file!
+1. We need Rust compiler(https://www.rust-lang.org/tools/install)
+
+### Install ffmpeg (do not forget this step if you want to upload video : )
+1. Install ffmpeg from https://ffmpeg.org/download.html
+2. Add ffmpeg to the system path
+
+
+```bash
+pip install -r videorequirements.txt
 ```
 
 ```bash
@@ -39,7 +54,7 @@ Run the following command to start the service:
 
 ```bash
 python -m simple_pandaaiqa.app
-```ç
+```
 
 Then access in your browser: http://localhost:8000
 
@@ -61,3 +76,4 @@ Steps to use:
 4. Start the LM Studio Server
 
 If LM Studio cannot be connected, the system will automatically display an error message.
+
