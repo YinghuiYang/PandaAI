@@ -499,7 +499,7 @@
         }
 
 
-        .toggle-button.gpu {
+        .toggle-button.npu {
             background-color: var(--danger-color);
             display: flex;
             align-items: center;
@@ -516,7 +516,7 @@
                 <img src="static/images/logo.png" alt="PandaAIQA Logo" class="logo">
             </div>
 
-            <!-- CPU/GPU Toggle Switch -->
+            <!-- CPU/NPU Toggle Switch -->
             <div class="toggle-container">
                 <label class="toggle-label">Processing Mode:</label>
                 <button id="toggle-button" class="toggle-button">CPU</button>
@@ -1550,18 +1550,18 @@
         // Load last selected mode from localStorage
         let currentMode = localStorage.getItem('processingMode') || 'CPU';
         toggleButton.textContent = currentMode;
-        if (currentMode === 'GPU') {
-            toggleButton.classList.add('gpu');
+        if (currentMode === 'NPU') {
+            toggleButton.classList.add('NPU');
         }
 
         toggleButton.addEventListener('click', function () {
             if (toggleButton.textContent === 'CPU') {
-                toggleButton.textContent = 'GPU';
-                toggleButton.classList.add('gpu');
-                localStorage.setItem('processingMode', 'GPU');
+                toggleButton.textContent = 'NPU';
+                toggleButton.classList.add('NPU');
+                localStorage.setItem('processingMode', 'NPU');
             } else {
                 toggleButton.textContent = 'CPU';
-                toggleButton.classList.remove('gpu');
+                toggleButton.classList.remove('NPU');
                 localStorage.setItem('processingMode', 'CPU');
             }
 
