@@ -12,7 +12,7 @@ DEBUG = True
 # text processing settings
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
-MAX_TEXT_LENGTH = 20000000  # increased for video processing
+MAX_TEXT_LENGTH = 30000000  # increased for video processing
 
 # embedding settings
 EMBEDDING_DIMENSION = 1536
@@ -30,3 +30,7 @@ LM_STUDIO_API_BASE = "http://127.0.0.1:1234"
 LM_STUDIO_MODEL = "default"
 LM_STUDIO_MAX_TOKENS = 1024
 LM_STUDIO_TEMPERATURE = 0.7
+
+#ANYTHINGLLM
+ANYTHINGLLM_API_BASE = "http://localhost:3001/api/v1/auth"
+ANYTHINGLLM_KEY = "77WZ5NE-XEX4T4X-GVZ74EK-J43FRVP"

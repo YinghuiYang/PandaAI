@@ -142,16 +142,16 @@ async def upload_file(
         content = await file.read()
 
         # check file size
-        if (
-            len(content) > MAX_TEXT_LENGTH * 2
-        ):  # allow file to be slightly larger than pure text
-            logger.warning(f"File too large: {len(content)} bytes")
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "message": f"File too large. Maximum allowed size is {MAX_TEXT_LENGTH * 2} bytes"
-                },
-            )
+        # if (
+        #     len(content) > MAX_TEXT_LENGTH * 2
+        # ):  # allow file to be slightly larger than pure text
+        #     logger.warning(f"File too small: {len(content)} bytes")
+        #     return JSONResponse(
+        #         status_code=400,
+        #         content={
+        #             "message": f"File too small. Maximum allowed size is {MAX_TEXT_LENGTH * 2} bytes"
+        #         },
+        #     )
 
         documents = []
         metadata = {"source": file.filename, "type": ext}
