@@ -101,6 +101,7 @@ COMPONENTS = {
     "generator": generator,
     "pdf_processor": pdf_processor,
     "video_processor": video_processor,
+    "image_processor": image_processor,
     "summarize_generator": summarize_generator
 }
 
