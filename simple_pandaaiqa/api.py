@@ -22,13 +22,14 @@ from pydantic import BaseModel, Field
 
 from simple_pandaaiqa.text_processor import TextProcessor
 from simple_pandaaiqa.pdf_processor import PDFProcessor
+from simple_pandaaiqa.video_processor import VideoProcessor
 
-# from simple_pandaaiqa.video_processor import VideoProcessor
 from simple_pandaaiqa.embedder import Embedder
 from simple_pandaaiqa.vector_store import VectorStore
 from simple_pandaaiqa.generator import Generator
 from simple_pandaaiqa.utils.helpers import extract_file_extension
 from simple_pandaaiqa.config import MAX_TEXT_LENGTH
+from tempfile import NamedTemporaryFile
 
 # Setup logging
 logging.basicConfig(
@@ -80,6 +81,7 @@ app = FastAPI(title="PandaAIQA", description="本地知识问答系统")
 # Initialize components
 text_processor = TextProcessor()
 pdf_processor = PDFProcessor()
+video_processor = VideoProcessor()
 embedder = Embedder()
 vector_store = VectorStore(embedder=embedder)
 generator = Generator()
@@ -105,7 +107,7 @@ def get_components():
         "vector_store": vector_store,
         "generator": generator,
         "pdf_processor": pdf_processor,
-        # "video_processor": video_processor,
+        "video_processor": video_processor,
     }
 
 
@@ -170,29 +172,16 @@ async def upload_file(
             documents = components["text_processor"].process_text(text, metadata)
         elif ext == "pdf":
             documents = components["pdf_processor"].process_pdf(content, metadata)
-        # else:  # video files
-        # text = components["video_processor"].extract_text_from_video(content)
+        else:  # video files
+            with NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
+                tmp_file.write(content)
+                tmp_file.flush()
+                video_file_path = tmp_file.name
+            documents = components["video_processor"].process_video(
+                video_file_path, metadata
+            )
 
-        # # decode text
-        # try:
-        #     text = content.decode("utf-8")
-        # except UnicodeDecodeError:
-        #     # try other encodings
-        #     try:
-        #         text = content.decode("latin-1")
-        #         logger.info("Using latin-1 encoding to decode file")
-        #     except:
-        #         logger.error("Failed to decode file content")
-        #         return JSONResponse(
-        #             status_code=400,
-        #             content={
-        #                 "message": "Failed to decode file content. Please ensure the file is a valid text file"
-        #             },
-        #         )
-
-        # # process text
-        # # metadata = {"source": file.filename, "type": "file"}
-        # documents = components["text_processor"].process_text(text, metadata)
+            os.unlink(tmp_file.name)
 
         if not documents:
             logger.warning("No documents generated from file")

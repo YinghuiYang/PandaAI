@@ -47,3 +47,7 @@ Steps to use:
 4. Start the LM Studio Server
 
 If LM Studio cannot be connected, the system will automatically display an error message.
+
+## Install ffmpeg
+1. Install ffmpeg from https://ffmpeg.org/download.html
+2. Add ffmpeg to the system path
