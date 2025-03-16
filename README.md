@@ -9,6 +9,7 @@ PandaAIQA is a simple local knowledge question answering system that supports an
 - Support for text and file uploads
 - Question answering based on similarity search
 - Integration with LM Studio for local generation
+- Role selection when handling different user scenario
 
 ## Installation
 
