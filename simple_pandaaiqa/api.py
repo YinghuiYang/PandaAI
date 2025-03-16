@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 
 from simple_pandaaiqa.text_processor import TextProcessor
 from simple_pandaaiqa.pdf_processor import PDFProcessor
+from simple_pandaaiqa.image_processor import ImageProcessor
 
 # from simple_pandaaiqa.video_processor import VideoProcessor
 from simple_pandaaiqa.embedder import Embedder
@@ -80,6 +81,7 @@ app = FastAPI(title="PandaAIQA", description="本地知识问答系统")
 # Initialize components
 text_processor = TextProcessor()
 pdf_processor = PDFProcessor()
+image_processor = ImageProcessor()
 embedder = Embedder()
 vector_store = VectorStore(embedder=embedder)
 generator = Generator()
@@ -105,6 +107,7 @@ def get_components():
         "vector_store": vector_store,
         "generator": generator,
         "pdf_processor": pdf_processor,
+        "image_processor": image_processor,
         # "video_processor": video_processor,
     }
 
@@ -125,7 +128,7 @@ async def upload_file(
 
         # check file type
         ext = extract_file_extension(file.filename)
-        if ext not in ["txt", "md", "csv", "pdf", "mp4"]:
+        if ext not in ["txt", "md", "csv", "pdf", "mp4", "jpg", "jpeg", "png"]:
             logger.warning(f"Unsupported file type: {ext}")
             return JSONResponse(
                 status_code=400,
@@ -170,6 +173,9 @@ async def upload_file(
             documents = components["text_processor"].process_text(text, metadata)
         elif ext == "pdf":
             documents = components["pdf_processor"].process_pdf(content, metadata)
+        elif ext in ["jpg", "jpeg", "png"]:
+            logger.info("Processing image with ImageProcessor...")
+            documents = components["image_processor"].process_image(content)
         # else:  # video files
         # text = components["video_processor"].extract_text_from_video(content)
 
