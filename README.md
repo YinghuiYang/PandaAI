@@ -26,6 +26,11 @@ pip install -r requirements.txt
 ## For Advanced Feature (video and image file input), you can skip this if you only have txt based file!
 1. We need Rust compiler(https://www.rust-lang.org/tools/install)
 
+### Install ffmpeg (do not forget this step if you want to upload video : )
+1. Install ffmpeg from https://ffmpeg.org/download.html
+2. Add ffmpeg to the system path
+
+
 ```bash
 pip install -r videorequirements.txt
 ```
@@ -72,6 +77,3 @@ Steps to use:
 
 If LM Studio cannot be connected, the system will automatically display an error message.
 
-## Install ffmpeg
-1. Install ffmpeg from https://ffmpeg.org/download.html
-2. Add ffmpeg to the system path
