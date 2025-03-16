@@ -48,6 +48,7 @@
         .logo-container {
             display: flex;
             align-items: center;
+            justify-content: center;
         }
 
         .logo {
@@ -498,7 +499,6 @@
             transition: all 0.3s ease;
         }
 
-
         .toggle-button.npu {
             background-color: var(--danger-color);
             display: flex;
@@ -515,9 +515,14 @@
             <div class="logo-container">
                 <img src="static/images/logo.png" alt="PandaAIQA Logo" class="logo">
             </div>
+            <!-- CPU/NPU Toggle Button -->
+            <div class="toggle-container">
+                <label class="toggle-label">Processing Mode:</label>
+                <button id="toggle-button" class="toggle-button">CPU</button>
+            </div>
             <h1>PandaAIQA</h1>
             <p>More than Q&A - customizable AI assistant for all scenarios, all roles!</p>
-            
+
             <!-- Add Role Selector -->
             <div class="role-selector">
                 <button id="role-selector-button" class="role-selector-button">
@@ -1544,17 +1549,17 @@
         let currentMode = localStorage.getItem('processingMode') || 'CPU';
         toggleButton.textContent = currentMode;
         if (currentMode === 'NPU') {
-            toggleButton.classList.add('NPU');
+            toggleButton.classList.add('npu');
         }
 
         toggleButton.addEventListener('click', function () {
             if (toggleButton.textContent === 'CPU') {
                 toggleButton.textContent = 'NPU';
-                toggleButton.classList.add('NPU');
+                toggleButton.classList.add('npu');
                 localStorage.setItem('processingMode', 'NPU');
             } else {
                 toggleButton.textContent = 'CPU';
-                toggleButton.classList.remove('NPU');
+                toggleButton.classList.remove('npu');
                 localStorage.setItem('processingMode', 'CPU');
             }
 
