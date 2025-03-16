@@ -11,7 +11,7 @@ class ImageProcessor:
     # Initialize EasyOCR
     def __init__(self, lang_list=["en"]):
         try:
-            self.reader = easyocr.Reader(lang_list, gpu=False) # Change this line to use GPU
+            self.reader = easyocr.Reader(lang_list, gpu=True) # Change this line to use GPU
             logger.info(f"Initialized EasyOCR for languages: {lang_list}")
         except Exception as e:
             logger.error(f"Error initializing EasyOCR: {str(e)}")
